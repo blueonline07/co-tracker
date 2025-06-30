@@ -48,6 +48,7 @@ class CoTrackerPredictor(torch.nn.Module):
         grid_query_frame: int = 0,  # only for dense and regular grid tracks
         backward_tracking: bool = False,
     ):
+        stupid_tracks = None
         if queries is None and grid_size == 0:
             tracks, visibilities = self._compute_dense_tracks(
                 video,
@@ -55,7 +56,7 @@ class CoTrackerPredictor(torch.nn.Module):
                 backward_tracking=backward_tracking,
             )
         else:
-            tracks, visibilities = self._compute_sparse_tracks(
+            tracks, visibilities, stupid_tracks = self._compute_sparse_tracks(
                 video,
                 queries,
                 segm_mask,
@@ -65,7 +66,7 @@ class CoTrackerPredictor(torch.nn.Module):
                 backward_tracking=backward_tracking,
             )
 
-        return tracks, visibilities
+        return tracks, visibilities, stupid_tracks
 
     def _compute_dense_tracks(
         self, video, grid_query_frame, grid_size=80, backward_tracking=False
@@ -154,7 +155,7 @@ class CoTrackerPredictor(torch.nn.Module):
             grid_pts = grid_pts.repeat(B, 1, 1)
             queries = torch.cat([queries, grid_pts], dim=1)
 
-        tracks, visibilities, *_ = self.model.forward(
+        tracks, visibilities, confidence, train_data, stupid_tracks = self.model.forward(
             video=video, queries=queries, iters=6
         )
 
@@ -187,7 +188,7 @@ class CoTrackerPredictor(torch.nn.Module):
         tracks *= tracks.new_tensor(
             [(W - 1) / (self.interp_shape[1] - 1), (H - 1) / (self.interp_shape[0] - 1)]
         )
-        return tracks, visibilities
+        return tracks, visibilities, stupid_tracks
 
     def _compute_backward_tracks(self, video, queries, tracks, visibilities):
         inv_video = video.flip(1).clone()

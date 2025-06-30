@@ -5,10 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from cotracker.models.core.cotracker.cotracker3_online import CoTrackerThreeBase, posenc
-
+from cotracker.models.core.cotracker.linear_regression import Model
 torch.manual_seed(0)
 
 
@@ -136,6 +135,7 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
 
         r = 2 * self.corr_radius + 1
 
+        stupid_coords = None
         for it in range(iters):
             coords = coords.detach()  # B T N 2
             coords_init = coords.view(B * T, N, 2)
@@ -209,8 +209,15 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
             confidence = confidence + delta_confidence
 
             coords = coords + delta_coords
+
+            linreg_input = coords.squeeze(0).to('cpu').numpy()
+
+            model = Model(linreg_input)
+            stupid_coords = model.get_coords()
+
             coords_append = coords.clone()
             coords_append[..., :2] = coords_append[..., :2] * float(self.stride)
+
             coord_preds.append(coords_append)
             vis_preds.append(torch.sigmoid(vis))
             confidence_preds.append(torch.sigmoid(confidence))
@@ -230,4 +237,4 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
         else:
             train_data = None
 
-        return coord_preds[-1][..., :2], vis_preds[-1], confidence_preds[-1], train_data
+        return coord_preds[-1][..., :2], vis_preds[-1], confidence_preds[-1], train_data, stupid_coords
