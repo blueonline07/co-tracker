@@ -6,10 +6,8 @@ class Model:
         self.frames =  frames
         self.T, self.N, self.m = frames.shape
 
-    def fit(self, limit, epochs = 1000, lr = 1e-3):
+    def fit(self, limit, epochs = 10000, lr = 1e-1):
         params = []
-        if limit == 0:
-            return params
         time = np.linspace(0, 1, limit)
         ones = np.ones_like(time)
         pair = np.stack([time, ones], axis=-1)
@@ -28,11 +26,11 @@ class Model:
         return params
 
     def get_coords(self):
-        coords = [self.frames[0]]
-        for t in range(1, self.T):
-            params = self.fit(t)
-            o = []
+        coords = []
+        for t in range(self.T):
+            params = self.fit(t + 1)
+            pred_coords = []
             for i in range(self.N):
-                o.append(np.array([t, 1]).dot(params[i]))
-            coords.append(np.array(o))
+                pred_coords.append(np.array([t, 1]).dot(params[i]))
+            coords.append(np.array(pred_coords))
         return torch.from_numpy(np.array(coords)[None, :])

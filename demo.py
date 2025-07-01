@@ -96,6 +96,7 @@ if __name__ == "__main__":
         backward_tracking=args.backward_tracking,
         # segm_mask=segm_mask
     )
+
     print("computed")
     # save a video with predicted tracks
     seq_name = args.video_path.split("/")[-1]
@@ -103,13 +104,11 @@ if __name__ == "__main__":
     vis.visualize(
         video,
         pred_tracks,
-        pred_visibility,
         query_frame=0 if args.backward_tracking else args.grid_query_frame,
     )
     vis = Visualizer(save_dir="./saved_stupid_videos", pad_value=120, linewidth=3)
     vis.visualize(
         video,
         stupid_tracks,
-        pred_visibility,
         query_frame=0 if args.backward_tracking else args.grid_query_frame,
     )

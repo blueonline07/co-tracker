@@ -65,7 +65,6 @@ class CoTrackerPredictor(torch.nn.Module):
                 grid_query_frame=grid_query_frame,
                 backward_tracking=backward_tracking,
             )
-
         return tracks, visibilities, stupid_tracks
 
     def _compute_dense_tracks(
@@ -158,6 +157,7 @@ class CoTrackerPredictor(torch.nn.Module):
         tracks, visibilities, confidence, train_data, stupid_tracks = self.model.forward(
             video=video, queries=queries, iters=6
         )
+        #shape: B T N 2
 
         if backward_tracking:
             tracks, visibilities = self._compute_backward_tracks(
@@ -188,6 +188,11 @@ class CoTrackerPredictor(torch.nn.Module):
         tracks *= tracks.new_tensor(
             [(W - 1) / (self.interp_shape[1] - 1), (H - 1) / (self.interp_shape[0] - 1)]
         )
+
+        stupid_tracks *= stupid_tracks.new_tensor(
+            [(W - 1) / (self.interp_shape[1] - 1), (H - 1) / (self.interp_shape[0] - 1)]
+        )
+
         return tracks, visibilities, stupid_tracks
 
     def _compute_backward_tracks(self, video, queries, tracks, visibilities):

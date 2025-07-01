@@ -135,7 +135,7 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
 
         r = 2 * self.corr_radius + 1
 
-        stupid_coords = None
+        stupid_coords_preds = []
         for it in range(iters):
             coords = coords.detach()  # B T N 2
             coords_init = coords.view(B * T, N, 2)
@@ -207,17 +207,19 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
 
             vis = vis + delta_vis
             confidence = confidence + delta_confidence
+            linreg_input = coords.squeeze(0).to('cpu').numpy()
 
             coords = coords + delta_coords
 
-            linreg_input = coords.squeeze(0).to('cpu').numpy()
-
             model = Model(linreg_input)
-            stupid_coords = model.get_coords()
 
+            stupid_coords = model.get_coords()
+            stupid_coords_append = stupid_coords.clone()
             coords_append = coords.clone()
+            stupid_coords_append[..., :2] = stupid_coords_append[..., :2] * float(self.stride)
             coords_append[..., :2] = coords_append[..., :2] * float(self.stride)
 
+            stupid_coords_preds.append(stupid_coords_append)
             coord_preds.append(coords_append)
             vis_preds.append(torch.sigmoid(vis))
             confidence_preds.append(torch.sigmoid(confidence))
@@ -237,4 +239,4 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
         else:
             train_data = None
 
-        return coord_preds[-1][..., :2], vis_preds[-1], confidence_preds[-1], train_data, stupid_coords
+        return coord_preds[-1][..., :2], vis_preds[-1], confidence_preds[-1], train_data, stupid_coords_preds[-1][..., :2]
