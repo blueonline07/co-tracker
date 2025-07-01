@@ -45,6 +45,9 @@ def _make_cotracker_predictor(
             predictor = CoTrackerPredictor(checkpoint=None, window_len=16, v2=True)
         elif version == "3":
             predictor = CoTrackerPredictor(checkpoint=None, window_len=60, v2=False)
+
+        print("hahaa")
+
     if pretrained:
         if version == "2":
             state_dict = torch.hub.load_state_dict_from_url(

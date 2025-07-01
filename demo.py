@@ -84,7 +84,7 @@ if __name__ == "__main__":
                 window_len=window_len,
             )
     else:
-        model = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline")
+        model = torch.hub.load("blueonline07/cotracker", "cotracker3_offline")
 
     model = model.to(DEFAULT_DEVICE)
     video = video.to(DEFAULT_DEVICE)
