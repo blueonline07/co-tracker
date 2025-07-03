@@ -7,7 +7,7 @@
 import torch
 import torch.nn.functional as F
 from cotracker.models.core.cotracker.cotracker3_online import CoTrackerThreeBase, posenc
-from cotracker.models.core.cotracker.linear_regression import Model
+from cotracker.models.core.cotracker.transformer import transform
 torch.manual_seed(0)
 
 
@@ -207,13 +207,11 @@ class CoTrackerThreeOffline(CoTrackerThreeBase):
 
             vis = vis + delta_vis
             confidence = confidence + delta_confidence
-            linreg_input = coords.squeeze(0).to('cpu').numpy()
+            trans_input = coords.squeeze(0).to('cpu')
 
             coords = coords + delta_coords
 
-            model = Model(linreg_input)
-
-            stupid_coords = model.get_coords()
+            stupid_coords = transform(trans_input).unsqueeze(0)
             stupid_coords_append = stupid_coords.clone()
             coords_append = coords.clone()
             stupid_coords_append[..., :2] = stupid_coords_append[..., :2] * float(self.stride)
