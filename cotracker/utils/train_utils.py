@@ -76,7 +76,7 @@ def get_eval_dataloader(dataset_root, ds_name):
 
         eval_dataset = KubricMovifDataset(
             data_root=os.path.join(
-                args.dataset_root, "kubric/kubric_movi_f_120_frames_dense/movi_f"
+                dataset_root, "kubric/kubric_movi_f_120_frames_dense/movi_f"
             ),
             traj_per_sample=1024,
             use_augs=False,
