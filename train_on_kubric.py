@@ -499,21 +499,20 @@ class Lite(LightningLite):
         if self.global_rank == 0:
             print("FINISHED TRAINING")
 
-            PATH = f"{args.ckpt_path}/{args.model_name}_final.pth"
-            torch.save(model.module.module.state_dict(), PATH)
-            run_test_eval(
-                evaluator,
-                model,
-                final_dataloaders,
-                logger.writer,
-                total_steps,
-                query_random=(
-                    args.query_sampling_method is not None
-                    and "random" in args.query_sampling_method
-                ),
-            )
-            logger.close()
-
+            # PATH = f"{args.ckpt_path}/{args.model_name}_final.pth"
+            # torch.save(model.module.module.state_dict(), PATH)
+            # run_test_eval(
+            #     evaluator,
+            #     model,
+            #     final_dataloaders,
+            #     logger.writer,
+            #     total_steps,
+            #     query_random=(
+            #         args.query_sampling_method is not None
+            #         and "random" in args.query_sampling_method
+            #     ),
+            # )
+            # logger.close()
 
 if __name__ == "__main__":
     signal.signal(signal.SIGUSR1, sig_handler)
